@@ -1,0 +1,214 @@
+====================================================================
+SETUP — Blog Publishing System via Google Apps Script + GitHub Pages
+====================================================================
+
+COMO FUNCIONA
+━━━━━━━━━━━━━
+Qualquer Google Docs compartilhado pode ser usado como fonte de artigo.
+Não é necessária uma pasta específica no Drive — cole a URL do documento
+diretamente na coluna doc_url da planilha e o sistema cuida do resto.
+
+
+PASSO 1 — CRIAR TOKEN NO GITHUB
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Acesse: https://github.com/settings/tokens
+2. Clique em "Generate new token (classic)"
+3. Nome: Blog Publisher
+4. Scopes necessários: marque "repo" (acesso total ao repositório)
+5. Clique em "Generate token"
+6. Copie o token gerado (exibido apenas uma vez)
+
+
+PASSO 2 — CONFIGURAR A PLANILHA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Crie uma Google Sheet chamada "Controle Editorial - Blog"
+2. Na primeira linha (cabeçalho), crie as colunas nesta ordem exata:
+   A: status
+   B: doc_url
+   C: public_url
+   D: html_generated_at
+   E: error
+
+3. Valores válidos para a coluna "status":
+   - (vazio)    → será processado na próxima publicação
+   - rascunho   → será processado na próxima publicação
+   - erro       → será processado novamente (após corrigir o problema)
+   - publicado  → NÃO será reprocessado
+   - arquivado  → NÃO será publicado; removido do índice/sitemap/feed
+
+
+PASSO 3 — INSTALAR E CONFIGURAR O CLASP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CLASP é a CLI oficial do Google para Apps Script. Permite fazer push do
+código local direto para o projeto, sem copiar e colar manualmente.
+
+3a. Instalar dependências (uma vez):
+
+   npm install
+
+3b. Fazer login no Google (uma vez por máquina):
+
+   npx clasp login
+
+   Abrirá o navegador para autorizar. Aceite e feche quando concluir.
+
+3c. Vincular ao script da planilha:
+
+   Opção A — script já existe (recomendado):
+   1. Abra a planilha > Extensões > Apps Script
+   2. Na URL do editor, copie o ID:
+      https://script.google.com/home/projects/SEU_SCRIPT_ID/edit
+   3. Cole o ID em .clasp.json:
+      { "scriptId": "SEU_SCRIPT_ID", "rootDir": "./gas" }
+   4. Execute:
+      npx clasp pull   ← sincroniza estado inicial (opcional)
+      npx clasp push   ← sobe o código local
+
+   Opção B — criar script novo vinculado à planilha:
+   1. Abra a planilha > Extensões > Apps Script e anote o ID conforme acima
+   2. Siga a Opção A a partir do passo 3
+
+3d. Publicar o código a qualquer momento:
+
+   npm run push
+   # equivale a: npx clasp push
+
+   Para abrir o editor no navegador:
+   npm run open
+
+   Para ver logs em tempo real:
+   npm run logs
+
+
+PASSO 4 — CONFIGURAR SCRIPT PROPERTIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. No Apps Script, clique em "Configurações do projeto" (ícone de engrenagem)
+2. Clique em "Adicionar propriedade de script"
+3. Adicione cada uma das propriedades abaixo:
+
+   GITHUB_TOKEN    → (token gerado no Passo 1)
+   GITHUB_OWNER    → (seu usuário ou organização no GitHub, ex: agencialinka)
+   GITHUB_REPO     → (nome do repositório, ex: agenciademarketingdigital.com.br)
+   GITHUB_BRANCH   → main
+   SITE_BASE_URL   → https://agenciademarketingdigital.com.br
+
+   ⚠️  NUNCA coloque o token diretamente no código ou na planilha.
+
+
+PASSO 5 — CONFIGURAR OS GOOGLE DOCS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Cada artigo é um Google Docs com a seguinte estrutura:
+
+   [Tabela de metadados — PRIMEIRA tabela do documento]
+   ┌─────────────────┬──────────────────────────────────┐
+   │ Campo           │ Valor                            │
+   ├─────────────────┼──────────────────────────────────┤
+   │ title           │ Título do artigo                 │
+   │ slug            │ titulo-do-artigo                 │
+   │ meta_title      │ Título para SEO (até 60 chars)   │
+   │ meta_description│ Descrição (até 160 chars)        │
+   │ author          │ Nome do Autor                    │
+   │ category        │ Marketing Digital (opcional)     │
+   │ tags            │ seo, b2b, estratégia (opcional)  │
+   │ featured_image  │ https://... (opcional)           │
+   │ featured_image_alt│ Texto alternativo (opcional)   │
+   │ published_at    │ 2025-01-15 (opcional)            │
+   │ updated_at      │ 2025-06-01 (opcional)            │
+   │ canonical       │ (opcional, usa URL padrão)       │
+   │ robots          │ (opcional, padrão: index,follow) │
+   └─────────────────┴──────────────────────────────────┘
+
+   [Conteúdo do artigo começa aqui]
+
+Regras para o slug:
+   - Somente letras minúsculas sem acento
+   - Números e hífens são permitidos
+   - SEM espaços, acentos ou caracteres especiais
+   - Exemplo válido:   seo-para-empresas-b2b
+   - Exemplo inválido: SEO para Empresas B2B
+
+Compartilhamento do Google Docs:
+   1. Clique em "Compartilhar"
+   2. Altere para "Qualquer pessoa com o link pode visualizar"
+   3. Copie a URL do documento
+
+
+PASSO 6 — ADICIONAR ARTIGOS NA PLANILHA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Para cada artigo, adicione uma linha na planilha:
+   - Coluna A (status):  rascunho  (ou deixe vazio)
+   - Coluna B (doc_url): https://docs.google.com/document/d/SEU_ID_AQUI/edit
+   - Colunas C, D, E:    deixe vazias (serão preenchidas automaticamente)
+
+
+PASSO 7 — AUTORIZAR O SCRIPT (PRIMEIRA VEZ)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Recarregue a planilha → o menu "Blog" aparecerá
+2. Clique em Blog > Publicar
+3. O Google solicitará autorização — clique em "Avançado" e depois em
+   "Acessar [nome do projeto] (não seguro)" para autorizar
+4. O script precisa de acesso a:
+   - Google Docs (para ler os artigos)
+   - URLs externas (para a API do GitHub)
+
+
+PASSO 8 — TESTAR A PUBLICAÇÃO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Adicione um artigo de teste na planilha com status "rascunho"
+2. Clique em Blog > Publicar
+3. Verifique no GitHub se o arquivo blog/SEU-SLUG.html foi criado
+4. Verifique se blog.html, sitemap.xml, feed.xml e data/blog.json foram atualizados
+5. Acesse https://agenciademarketingdigital.com.br/blog/SEU-SLUG para confirmar
+
+
+ESTRUTURA DE ARQUIVOS GERADOS NO GITHUB
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+blog/
+  └── SEU-SLUG.html          → artigo publicado
+blog.html                    → índice do blog
+data/
+  └── blog.json              → feed de dados para uso externo
+sitemap.xml                  → sitemap para Google Search Console
+feed.xml                     → RSS feed
+
+
+ARQUIVAMENTO DE ARTIGOS
+━━━━━━━━━━━━━━━━━━━━━━━
+- Altere o status para "arquivado" na planilha
+- Na próxima publicação, o artigo será removido do índice,
+  blog.json, sitemap e feed
+- O arquivo .html NÃO é deletado do GitHub automaticamente
+  (remoção manual se necessário)
+
+
+REPUBLICAÇÃO / ATUALIZAÇÃO DE UM ARTIGO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Edite o conteúdo no Google Docs normalmente
+- Altere o status na planilha de "publicado" para "rascunho"
+- Clique em Blog > Publicar
+- O arquivo será substituído no GitHub com o novo conteúdo
+
+
+DICAS E RESOLUÇÃO DE ERROS
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+Erro: "não foi possível acessar o Google Docs"
+→ Verifique se o documento está compartilhado como "qualquer pessoa com link"
+→ Verifique se o doc_url está correto
+
+Erro: "primeira tabela de metadados não encontrada"
+→ O documento precisa ter uma tabela como PRIMEIRO elemento
+
+Erro: "campo obrigatório ausente: slug"
+→ Verifique se a tabela tem as linhas: title, slug, meta_title, meta_description, author
+
+Erro: "slug inválido"
+→ O slug só pode conter letras minúsculas sem acento, números e hífens
+
+Erro: "erro ao publicar no GitHub: ..."
+→ Verifique as Script Properties: GITHUB_TOKEN, GITHUB_OWNER, GITHUB_REPO, GITHUB_BRANCH
+→ Confirme que o token tem permissão "repo"
+
+Timeout (execução longa):
+→ O Google Apps Script tem limite de 6 minutos por execução
+→ Se o blog tiver muitos artigos novos, publique em lotes (mude poucos para rascunho por vez)
+====================================================================
