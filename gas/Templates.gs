@@ -204,6 +204,15 @@ function buildArticleHtml(meta, bodyHtml, config) {
   return `${siteHead(meta, canonical, 'article')}
   ${schema}
   ${breadcrumbSchema}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300..700&display=swap" rel="stylesheet">
+  <style>
+    .blog-article h1, .blog-article h2, .blog-article h3,
+    .blog-article h4, .blog-article h5, .blog-article h6 {
+      font-family: 'Oswald', sans-serif;
+    }
+  </style>
 </head>
 ${siteBodyOpen()}
 
