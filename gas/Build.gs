@@ -69,7 +69,6 @@ function buildPostEntry(meta, config) {
     meta_description: meta.meta_description || '',
     author:           meta.author           || '',
     category:         meta.category         || '',
-    tags:             Array.isArray(meta.tags) ? meta.tags : [],
     published_at:     meta.published_at     || '',
     updated_at:       meta.updated_at       || '',
     featured_image:   meta.featured_image   || ''

@@ -70,10 +70,6 @@ function extractMetadataFromDoc(docId) {
     if (key) meta[key] = value;
   }
 
-  meta.tags = meta.tags
-    ? meta.tags.split(',').map(t => t.trim()).filter(Boolean)
-    : [];
-
   return meta;
 }
 

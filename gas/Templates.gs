@@ -178,7 +178,6 @@ function siteBodyClose() {
 
 function buildArticleHtml(meta, bodyHtml, config) {
   const canonical = meta.canonical || `${config.baseUrl}/blog/${meta.slug}`;
-  const tagsArr   = Array.isArray(meta.tags) ? meta.tags : [];
   const hasImage  = !!meta.featured_image;
 
   const schema = buildArticleSchema(meta, canonical, hasImage);
@@ -192,10 +191,6 @@ function buildArticleHtml(meta, bodyHtml, config) {
       : '',
     meta.category ? `<a href="/blog?categoria=${encodeURIComponent(meta.category)}" class="category">${escapeHtml(meta.category)}</a>` : ''
   ].filter(Boolean).join('\n        ');
-
-  const tagsHtml = tagsArr.length
-    ? `<div class="tags">${tagsArr.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>`
-    : '';
 
   const featuredImg = hasImage
     ? `<img src="${escapeHtml(meta.featured_image)}" alt="${escapeHtml(meta.featured_image_alt || meta.h1)}" class="featured-image" loading="eager">`
@@ -233,7 +228,6 @@ ${siteBodyOpen()}
           <div class="article-meta">
             ${articleMetaHtml}
           </div>
-          ${tagsHtml}
         </header>
 
         <div class="article-content">

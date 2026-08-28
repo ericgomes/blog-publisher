@@ -75,7 +75,6 @@ function createTestDoc() {
     ['meta_description',  'Aprenda as principais estratégias de SEO para 2025 e como aplicar em seu negócio para atrair mais clientes orgânicos.'],
     ['author',            'Eric Linka'],
     ['category',          'SEO'],
-    ['tags',              'seo, google, marketing digital, tráfego orgânico'],
     ['featured_image',    ''],
     ['featured_image_alt',''],
     ['published_at',      ''],
