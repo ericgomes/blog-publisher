@@ -70,7 +70,8 @@ function createTestDoc() {
   // Tabela de metadados
   const meta = [
     ['slug',              'seo-para-crescer-no-google-2025'],
-    ['meta_title',        'SEO em 2025: guia completo para ranquear no Google'],
+    ['title',             'SEO em 2025: guia completo para ranquear no Google'],
+    ['h1',               'Como usar SEO para crescer no Google em 2025'],
     ['meta_description',  'Aprenda as principais estratégias de SEO para 2025 e como aplicar em seu negócio para atrair mais clientes orgânicos.'],
     ['author',            'Eric Linka'],
     ['category',          'SEO'],
@@ -163,10 +164,23 @@ function publish() {
     const status = normalizeStatus(row[COL.STATUS]);
     const docUrl = (row[COL.DOC_URL] || '').toString().trim();
 
-    if (!docUrl) continue;
-    if (status === 'publicado' || status === 'arquivado') continue;
-
     const rowNum = i + 1;
+
+    if (!docUrl) continue;
+    if (status === 'publicado') continue;
+
+    if (status === 'arquivado') {
+      const publicUrl = (row[COL.PUBLIC_URL] || '').toString().trim();
+      if (publicUrl) {
+        const slug = publicUrl.split('/').pop();
+        if (slug) {
+          try { deleteGithubFile(`blog/${slug}.html`, `Arquivar: ${slug}`); } catch (e) {}
+          sheet.getRange(rowNum, COL.PUBLIC_URL + 1).setValue('');
+          sheet.getRange(rowNum, COL.ERROR + 1).setValue('');
+        }
+      }
+      continue;
+    }
     try {
       const meta = processArticleRow(sheet, rowNum, row, slugsInBatch);
       slugsInBatch.add(meta.slug);
@@ -207,9 +221,9 @@ function processArticleRow(sheet, rowNum, row, slugsInBatch) {
   const rawHtml     = exportGoogleDocAsHtml(docId);
   const articleBody = cleanArticleHtml(rawHtml);
 
-  if (!meta.title) {
-    meta.title = extractTitleFromHtml(articleBody);
-    if (!meta.title) throw new Error('título não encontrado: adicione um H1 no corpo do documento ou o campo title nos metadados');
+  if (!meta.h1) {
+    meta.h1 = extractTitleFromHtml(articleBody);
+    if (!meta.h1) throw new Error('H1 não encontrado: adicione um H1 no corpo do documento ou o campo h1 nos metadados');
   }
 
   const config    = getConfig();
@@ -236,7 +250,7 @@ function processArticleRow(sheet, rowNum, row, slugsInBatch) {
 // ── helpers ──────────────────────────────────────────────────
 
 function validateMeta(meta, slugsInBatch) {
-  const required = ['slug', 'meta_title', 'meta_description', 'author'];
+  const required = ['slug', 'title', 'meta_description', 'author'];
   for (const field of required) {
     if (!meta[field]) throw new Error(`campo obrigatório ausente: ${field}`);
   }

@@ -49,6 +49,19 @@ function upsertGithubFile(path, content, message) {
   return putGithubFile(path, content, message, existing ? existing.sha : undefined);
 }
 
+function deleteGithubFile(path, message) {
+  const file = getGithubFile(path);
+  if (!file) return;
+  const config = getConfig();
+  const url    = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${path}`;
+  UrlFetchApp.fetch(url, {
+    method: 'DELETE',
+    headers: { ...githubHeaders(config.token), 'Content-Type': 'application/json' },
+    payload: JSON.stringify({ message: message || `Arquivar: ${path}`, sha: file.sha, branch: config.branch }),
+    muteHttpExceptions: true
+  });
+}
+
 function githubHeaders(token) {
   return {
     Authorization: `token ${token}`,

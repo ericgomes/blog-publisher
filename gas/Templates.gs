@@ -25,7 +25,7 @@ function siteHead(meta, canonicalUrl, ogType) {
   })(window,document,'script','dataLayer','${GTM_ID}');</script>
   <!-- End Google Tag Manager -->
 
-  <title>${escapeHtml(meta.meta_title || meta.title)}</title>
+  <title>${escapeHtml(meta.title || meta.h1)}</title>
   <meta name="description" content="${escapeHtml(meta.meta_description)}">
   <meta name="robots" content="${escapeHtml(meta.robots || 'index,follow')}">
   <link rel="canonical" href="${canonicalUrl}">
@@ -34,7 +34,7 @@ function siteHead(meta, canonicalUrl, ogType) {
   <!-- Open Graph -->
   <meta property="og:type" content="${ogType || 'article'}">
   <meta property="og:site_name" content="${SITE_NAME}">
-  <meta property="og:title" content="${escapeHtml(meta.meta_title || meta.title)}">
+  <meta property="og:title" content="${escapeHtml(meta.title || meta.h1)}">
   <meta property="og:description" content="${escapeHtml(meta.meta_description)}">
   <meta property="og:url" content="${canonicalUrl}">
   <meta property="og:locale" content="pt_BR">${ogImage}
@@ -43,7 +43,7 @@ function siteHead(meta, canonicalUrl, ogType) {
 
   <!-- Twitter / X Card -->
   <meta name="twitter:card" content="${meta.featured_image ? 'summary_large_image' : 'summary'}">
-  <meta name="twitter:title" content="${escapeHtml(meta.meta_title || meta.title)}">
+  <meta name="twitter:title" content="${escapeHtml(meta.title || meta.h1)}">
   <meta name="twitter:description" content="${escapeHtml(meta.meta_description)}">
   ${meta.featured_image ? `<meta name="twitter:image" content="${escapeHtml(meta.featured_image)}">` : ''}
 
@@ -198,7 +198,7 @@ function buildArticleHtml(meta, bodyHtml, config) {
     : '';
 
   const featuredImg = hasImage
-    ? `<img src="${escapeHtml(meta.featured_image)}" alt="${escapeHtml(meta.featured_image_alt || meta.title)}" class="featured-image" loading="eager">`
+    ? `<img src="${escapeHtml(meta.featured_image)}" alt="${escapeHtml(meta.featured_image_alt || meta.h1)}" class="featured-image" loading="eager">`
     : '';
 
   return `${siteHead(meta, canonical, 'article')}
@@ -223,7 +223,7 @@ ${siteBodyOpen()}
         <ol>
           <li><a href="/">Home</a></li>
           <li><a href="/blog">Blog</a></li>
-          <li aria-current="page">${escapeHtml(meta.title)}</li>
+          <li aria-current="page">${escapeHtml(meta.h1)}</li>
         </ol>
       </nav>
 
@@ -254,7 +254,7 @@ function buildArticleSchema(meta, canonical, hasImage) {
   const parts = [
     `"@context": "https://schema.org"`,
     `"@type": "BlogPosting"`,
-    `"headline": "${escapeJson(meta.title)}"`,
+    `"headline": "${escapeJson(meta.h1)}"`,
     `"description": "${escapeJson(meta.meta_description)}"`,
     `"url": "${canonical}"`,
     meta.published_at ? `"datePublished": "${meta.published_at}"` : '',
@@ -277,7 +277,7 @@ function buildBreadcrumbSchema(meta, canonical, config) {
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "Home",  "item": "${config.baseUrl}" },
       { "@type": "ListItem", "position": 2, "name": "Blog",  "item": "${config.baseUrl}/blog" },
-      { "@type": "ListItem", "position": 3, "name": "${escapeJson(meta.title)}", "item": "${canonical}" }
+      { "@type": "ListItem", "position": 3, "name": "${escapeJson(meta.h1)}", "item": "${canonical}" }
     ]
   }
   </script>`;
@@ -287,7 +287,7 @@ function buildBreadcrumbSchema(meta, canonical, config) {
 
 function buildBlogIndexHtml(posts, config) {
   const indexMeta = {
-    meta_title:       `Blog | ${SITE_NAME}`,
+    title:            `Blog | ${SITE_NAME}`,
     meta_description: 'Artigos sobre marketing digital, SEO, redes sociais e estratégias para crescer online.',
     robots:           'index,follow'
   };

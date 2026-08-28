@@ -61,7 +61,7 @@ function getPublishedSlugsFromSheet(sheet) {
 
 function buildPostEntry(meta, config) {
   return {
-    title:            meta.title            || '',
+    title:            meta.h1               || '',
     slug:             meta.slug             || '',
     url:              `/blog/${meta.slug}`,
     public_url:       `${config.baseUrl}/blog/${meta.slug}`,
