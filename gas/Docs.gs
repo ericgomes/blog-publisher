@@ -65,8 +65,10 @@ function extractMetadataFromDoc(docId) {
   for (let r = 0; r < metaTable.getNumRows(); r++) {
     const row = metaTable.getRow(r);
     if (row.getNumCells() < 2) continue;
-    const key   = row.getCell(0).getText().trim().toLowerCase();
-    const value = row.getCell(1).getText().trim();
+    const key = row.getCell(0).getText().trim().toLowerCase();
+    // Suporta tabela de 2 colunas (campo|valor) e 3 colunas (campo|preenchimento|valor)
+    const valCol = row.getNumCells() >= 3 ? 2 : 1;
+    const value  = row.getCell(valCol).getText().trim();
     if (key) meta[key] = value;
   }
 
@@ -170,13 +172,19 @@ function updateDocAfterPublish(docId, updates) {
     if (key) existingKeys[key] = r;
   }
 
+  // Detecta se a tabela tem 3 colunas (campo|preenchimento|valor)
+  const firstRow = metaTable.getRow(0);
+  const has3Cols = firstRow.getNumCells() >= 3;
+
   for (const [key, value] of Object.entries(updates)) {
     if (existingKeys[key] !== undefined) {
-      const cell = metaTable.getRow(existingKeys[key]).getCell(1);
+      const row  = metaTable.getRow(existingKeys[key]);
+      const cell = row.getCell(has3Cols ? 2 : 1);
       key === 'public_url' ? setLinkInCell(cell, value) : cell.setText(value);
     } else {
       const newRow = metaTable.appendTableRow();
       newRow.appendTableCell(key);
+      if (has3Cols) newRow.appendTableCell('automático');
       const cell = newRow.appendTableCell('');
       key === 'public_url' ? setLinkInCell(cell, value) : cell.setText(value);
     }

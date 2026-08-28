@@ -67,20 +67,21 @@ function createTestDoc() {
 
   body.clear();
 
-  // Tabela de metadados
+  // Tabela de metadados (campo | preenchimento | valor)
   const meta = [
-    ['slug',              'seo-para-crescer-no-google-2025'],
-    ['title',             'SEO em 2025: guia completo para ranquear no Google'],
-    ['h1',               'Como usar SEO para crescer no Google em 2025'],
-    ['meta_description',  'Aprenda as principais estratégias de SEO para 2025 e como aplicar em seu negócio para atrair mais clientes orgânicos.'],
-    ['author',            'Eric Linka'],
-    ['category',          'SEO'],
-    ['featured_image',    ''],
-    ['featured_image_alt',''],
-    ['published_at',      ''],
-    ['updated_at',        ''],
-    ['canonical',         ''],
-    ['robots',            'index,follow'],
+    ['public_url',        'automático',   ''],
+    ['title',             'opcional',     'SEO em 2025: guia completo para ranquear no Google'],
+    ['meta_description',  'obrigatório',  'Aprenda as principais estratégias de SEO para 2025 e como aplicar em seu negócio para atrair mais clientes orgânicos.'],
+    ['author',            'obrigatório',  'Eric Linka'],
+    ['category',          'opcional',     'SEO'],
+    ['h1',                'opcional',     'Como usar SEO para crescer no Google em 2025'],
+    ['featured_image',    'opcional',     ''],
+    ['featured_image_alt','opcional',     ''],
+    ['published_at',      'automático',   ''],
+    ['updated_at',        'automático',   ''],
+    ['slug',              'automático',   ''],
+    ['robots',            'opcional',     'index,follow'],
+    ['canonical',         'opcional',     ''],
   ];
 
   const table = body.appendTable(meta);
@@ -249,9 +250,20 @@ function processArticleRow(sheet, rowNum, row, slugsInBatch) {
 // ── helpers ──────────────────────────────────────────────────
 
 function validateMeta(meta, slugsInBatch) {
-  const required = ['slug', 'title', 'meta_description', 'author'];
+  const required = ['meta_description', 'author'];
   for (const field of required) {
     if (!meta[field]) throw new Error(`campo obrigatório ausente: ${field}`);
+  }
+
+  // Auto-preenche opcionais
+  if (!meta.title)  meta.title  = meta.h1 || '';
+  if (!meta.robots) meta.robots = 'index,follow';
+
+  // Auto-gera slug se não preenchido
+  if (!meta.slug) {
+    const base = meta.h1 || meta.title;
+    if (!base) throw new Error('não foi possível gerar slug: preencha h1 ou title');
+    meta.slug = generateSlug(base);
   }
 
   const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -262,6 +274,21 @@ function validateMeta(meta, slugsInBatch) {
   if (slugsInBatch.has(meta.slug)) {
     throw new Error(`slug duplicado: ${meta.slug}`);
   }
+}
+
+function generateSlug(text) {
+  const accents = 'àáâãäåæçèéêëìíîïðñòóôõöùúûüýþÿ';
+  const plain   = 'aaaaaaaceeeeiiiidnoooooouuuuyby';
+  let s = (text || '').toLowerCase();
+  for (let i = 0; i < accents.length; i++) {
+    s = s.split(accents[i]).join(plain[i]);
+  }
+  return s
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
 function setRowError(sheet, rowNum, message) {
