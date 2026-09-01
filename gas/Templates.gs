@@ -312,7 +312,7 @@ function buildBlogIndexHtml(posts, config) {
         ${catHtml}
         <h2 class="post-title"><a href="/blog/${p.slug}">${escapeHtml(p.title)}</a></h2>
         ${descHtml}
-        <div class="post-meta">${authorHtml}${dateHtml}</div>
+        <div class="post-meta">${authorHtml}${authorHtml && dateHtml ? ' &nbsp;·&nbsp; ' : ''}${dateHtml}</div>
         <a href="/blog/${p.slug}" class="read-more" aria-label="Ler: ${escapeHtml(p.title)}">Ler artigo &rarr;</a>
       </div>
     </article>`;
@@ -323,7 +323,18 @@ function buildBlogIndexHtml(posts, config) {
     : '';
 
   return `${siteHead(indexMeta, `${config.baseUrl}/blog`, 'website')}
-  <style>#lang-switcher { display: none !important; }</style>
+  <style>
+    #lang-switcher { display: none !important; }
+    .post-grid { display: flex; flex-direction: column; gap: 3.5rem; }
+    .post-card { padding-bottom: 3.5rem; border-bottom: 1px solid rgba(128,128,128,0.2); }
+    .post-card:last-child { border-bottom: none; }
+    .post-card-body { display: flex; flex-direction: column; gap: 0.6rem; }
+    .post-title { margin: 0.25rem 0 0; }
+    .post-description { margin: 0; opacity: 0.85; }
+    .post-meta { margin-top: 0.25rem; opacity: 0.7; font-size: 0.875rem; }
+    .read-more { margin-top: 0.5rem; }
+    .category { font-size: 0.8rem; letter-spacing: 0.05em; text-transform: uppercase; }
+  </style>
 </head>
 ${siteBodyOpen()}
 
