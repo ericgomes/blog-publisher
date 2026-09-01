@@ -206,6 +206,16 @@ function buildArticleHtml(meta, bodyHtml, config) {
     .blog-article h1, .blog-article h2, .blog-article h3,
     .blog-article h4, .blog-article h5, .blog-article h6 {
       font-family: 'Oswald', sans-serif;
+      color: inherit;
+    }
+    .article-content, .blog-article {
+      max-width: 100%;
+      overflow-x: hidden;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+    .article-content img, .article-content table, .article-content pre {
+      max-width: 100%;
     }
     #lang-switcher { display: none !important; }
   </style>
