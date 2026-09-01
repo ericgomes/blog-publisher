@@ -207,6 +207,7 @@ function buildArticleHtml(meta, bodyHtml, config) {
     .blog-article h4, .blog-article h5, .blog-article h6 {
       font-family: 'Oswald', sans-serif;
     }
+    #lang-switcher { display: none !important; }
   </style>
 </head>
 ${siteBodyOpen()}
@@ -312,6 +313,7 @@ function buildBlogIndexHtml(posts, config) {
     : '';
 
   return `${siteHead(indexMeta, `${config.baseUrl}/blog`, 'website')}
+  <style>#lang-switcher { display: none !important; }</style>
 </head>
 ${siteBodyOpen()}
 
