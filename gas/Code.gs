@@ -207,6 +207,16 @@ function processArticleRow(sheet, rowNum, row, slugsInBatch) {
   if (!docId) throw new Error('doc_url inválido');
 
   const meta = extractMetadataFromDoc(docId);
+
+  // Extrai HTML antes de validar para que h1 esteja disponível no auto-fill
+  const rawHtml     = exportGoogleDocAsHtml(docId);
+  const articleBody = cleanArticleHtml(rawHtml);
+
+  if (!meta.h1) {
+    meta.h1 = extractTitleFromHtml(articleBody);
+    if (!meta.h1) throw new Error('H1 não encontrado: adicione um H1 no corpo do documento ou o campo h1 nos metadados');
+  }
+
   validateMeta(meta, slugsInBatch);
 
   const currentDatetime = formatDate(new Date());
@@ -217,14 +227,6 @@ function processArticleRow(sheet, rowNum, row, slugsInBatch) {
     meta.published_at = parsed || currentDatetime;
   }
   meta.updated_at = currentDatetime;
-
-  const rawHtml     = exportGoogleDocAsHtml(docId);
-  const articleBody = cleanArticleHtml(rawHtml);
-
-  if (!meta.h1) {
-    meta.h1 = extractTitleFromHtml(articleBody);
-    if (!meta.h1) throw new Error('H1 não encontrado: adicione um H1 no corpo do documento ou o campo h1 nos metadados');
-  }
 
   const config    = getConfig();
   const publicUrl = `${config.baseUrl}/blog/${meta.slug}`;
