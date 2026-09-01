@@ -72,6 +72,20 @@ function extractMetadataFromDoc(docId) {
     if (key) meta[key] = value;
   }
 
+  // Extrai h1 da estrutura do doc se não estiver na tabela
+  if (!meta.h1) {
+    for (let i = 0; i < numItems; i++) {
+      const child = body.getChild(i);
+      if (child.getType() !== DocumentApp.ElementType.PARAGRAPH) continue;
+      const heading = child.asParagraph().getHeading();
+      if (heading === DocumentApp.ParagraphHeading.HEADING1 ||
+          heading === DocumentApp.ParagraphHeading.TITLE) {
+        const text = child.asParagraph().getText().trim();
+        if (text) { meta.h1 = text; break; }
+      }
+    }
+  }
+
   return meta;
 }
 
